@@ -125,7 +125,7 @@ void MainWindow::on_btnGenerate_clicked()
         int randIdx = QRandomGenerator::global()->bounded(index.size());
         int key = index[randIdx].key;
         int comps = 0;
-        db.search(key, comps);
+        (void)db.search(key, comps);
         totalComparisons += comps;
     }
     double avg = (double)totalComparisons / tests;

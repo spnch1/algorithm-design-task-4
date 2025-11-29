@@ -1,4 +1,4 @@
-    #ifndef DATABASEMANAGER_H
+#ifndef DATABASEMANAGER_H
 #define DATABASEMANAGER_H
 
 #include <QString>
@@ -19,7 +19,7 @@ struct IndexEntry {
     int key;
     qint64 offset;
 
-    bool operator<(const IndexEntry& other) const {
+    bool operator<(const IndexEntry& other) const noexcept {
         return key < other.key;
     }
 };
@@ -29,17 +29,20 @@ public:
     DatabaseManager();
     ~DatabaseManager();
 
-    bool add(int key, const QString& data);
-    QString search(int key, int& comparisons);
-    bool remove(int key);
-    bool edit(int key, const QString& newData);
+    DatabaseManager(const DatabaseManager&) = delete;
+    DatabaseManager& operator=(const DatabaseManager&) = delete;
+
+    [[nodiscard]] bool add(int key, const QString& data);
+    [[nodiscard]] QString search(int key, int& comparisons);
+    [[nodiscard]] bool remove(int key);
+    [[nodiscard]] bool edit(int key, const QString& newData);
     void generateRandom(int count);
     void clear();
 
-    QList<IndexEntry> getIndexTable() const;
-    QList<Record> getDataTable() const;
+    [[nodiscard]] QList<IndexEntry> getIndexTable() const;
+    [[nodiscard]] QList<Record> getDataTable() const;
 
-    QString getComplexity() const;
+    [[nodiscard]] QString getComplexity() const;
 
 private:
     QString dataFilePath;
