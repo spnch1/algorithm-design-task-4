@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
+#include <QInputDialog>
 #include <QTime>
 #include <QRandomGenerator>
 
@@ -9,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(std::make_unique<Ui::MainWindow>())
 {
     ui->setupUi(this);
+    connect(ui->spinDisplayLimit, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &MainWindow::refreshTables);
     refreshTables();
     log("System initialized.");
 }
@@ -27,11 +30,11 @@ void MainWindow::refreshTables()
     }
 
     QList<Record> data = db.getDataTable();
-    int limit = qMin(data.size(), 1000);
+    int limit = qMin(data.size(), ui->spinDisplayLimit->value());
     ui->tableData->setRowCount(limit);
     for (int i = 0; i < limit; ++i) {
         ui->tableData->setItem(i, 0, new QTableWidgetItem(QString::number(data[i].key)));
-        ui->tableData->setItem(i, 1, new QTableWidgetItem(QString::fromUtf8(data[i].data)));
+        ui->tableData->setItem(i, 1, new QTableWidgetItem(QString::fromUtf8(data[i].data.data())));
     }
     if (data.size() > limit) {
         log(QString("Displaying first %1 records of %2.").arg(limit).arg(data.size()));
@@ -109,9 +112,14 @@ void MainWindow::on_btnDelete_clicked()
 
 void MainWindow::on_btnGenerate_clicked()
 {
-    log("Generating 10,000 random records... Please wait.");
+    bool ok;
+    int count = QInputDialog::getInt(this, "Generate Random Records",
+                                     "Number of records:", 10000, 1, 1000000, 1, &ok);
+    if (!ok) return;
+
+    log(QString("Generating %1 random records... Please wait.").arg(count));
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    db.generateRandom(10000);
+    db.generateRandom(count);
     QApplication::restoreOverrideCursor();
     log("Generation complete.");
     refreshTables();
