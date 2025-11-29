@@ -172,7 +172,7 @@ void DatabaseManager::generateRandom(int count) {
     for (int i = 0; i < count; ++i) {
         int key;
         do {
-            key = QRandomGenerator::global()->bounded(2147483647); // Ensure positive int
+            key = QRandomGenerator::global()->bounded(2147483647);
         } while (usedKeys.contains(key));
         usedKeys.insert(key);
 
