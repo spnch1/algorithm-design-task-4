@@ -25,6 +25,7 @@ private slots:
     void on_btnGenerate_clicked();
     void on_btnInfo_clicked();
     void on_btnClear_clicked();
+    void on_btnPerformanceTest_clicked();
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;

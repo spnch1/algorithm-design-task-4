@@ -156,3 +156,56 @@ void MainWindow::on_btnClear_clicked()
     refreshTables();
     log("Database cleared.");
 }
+
+void MainWindow::on_btnPerformanceTest_clicked()
+{
+    QList<IndexEntry> index = db.getIndexTable();
+    if (index.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Database is empty. Generate records first.");
+        return;
+    }
+
+    bool ok;
+    int testCount = QInputDialog::getInt(this, "Benchmark Searches",
+                                         "Number of searches to perform:", 25, 1, 10000, 1, &ok);
+    if (!ok) return;
+
+    log(QString("==== Benchmark: %1 searches ====").arg(testCount));
+    
+    int totalComparisons = 0;
+    int minComparisons = INT_MAX;
+    int maxComparisons = 0;
+
+    for (int i = 0; i < testCount; ++i) {
+        int randIdx = QRandomGenerator::global()->bounded(index.size());
+        int key = index[randIdx].key;
+        int comps = 0;
+        QString result = db.search(key, comps);
+        
+        totalComparisons += comps;
+        minComparisons = qMin(minComparisons, comps);
+        maxComparisons = qMax(maxComparisons, comps);
+        
+        log(QString("Search #%1: Key=%2, Comparisons=%3, Found=%4")
+            .arg(i + 1)
+            .arg(key)
+            .arg(comps)
+            .arg(result.isEmpty() ? "No" : "Yes"));
+    }
+
+    double avg = (double)totalComparisons / testCount;
+    
+    log("==== Statistics ====");
+    log(QString("Total searches: %1").arg(testCount));
+    log(QString("Average comparisons: %1").arg(avg, 0, 'f', 2));
+    log(QString("Min comparisons: %1").arg(minComparisons));
+    log(QString("Max comparisons: %1").arg(maxComparisons));
+    log(QString("Total comparisons: %1").arg(totalComparisons));
+    log("====================");
+    
+    QMessageBox::information(this, "Benchmark Complete",
+                             QString("Average comparisons: %1\nMin: %2\nMax: %3")
+                             .arg(avg, 0, 'f', 2)
+                             .arg(minComparisons)
+                             .arg(maxComparisons));
+}
